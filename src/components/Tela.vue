@@ -4,6 +4,9 @@
     <h3 v-text="titulo + ' olá'"></h3>
     <button v-on:click="reverseMessage">Inverter</button>
     <p>{{message}}</p>
+
+    <input v-model="message">
+    
     <p v-text="titulo + new Date().toLocaleString()"></p>
     <span v-if="seen">Mostra isso?</span>
     <img v-bind:src="foto.url" v-bind:alt="foto.alt" />
