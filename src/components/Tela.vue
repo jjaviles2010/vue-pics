@@ -1,28 +1,12 @@
 <template>
   <div class="corpo">
     <h1 class="centralizado">{{msg}}</h1>
-    <h3 v-text="titulo + ' olá'"></h3>
-    <button v-on:click="reverseMessage">Inverter</button>
-    <p>{{message}}</p>
-
-    <input v-model="message" />
-
-    <p v-text="titulo + new Date().toLocaleString()"></p>
-    <span v-if="seen">Mostra isso?</span>
-    <img v-bind:src="foto.url" v-bind:alt="foto.alt" />
+    <input v-on:input="filtro = $event.target.value" type="search" placeholder="filtre pelo primeiro nome" class="filtro" />
     <ul class="lista-fotos">
-      <li v-for="user in users" :key="user.id" class="lista-fotos-item">
-        <div class="painel">
-          <h2 class="painel-titulo">{{user.first_name + ' ' + user.last_name}}</h2>
-          <div class="painel-corpo">
-            <img
-              class="imagem-responsivas"
-              v-bind:src="user.avatar"
-              :alt="user.first_name"
-              :title="user.first_name + user.last_name"
-            />
-          </div>
-        </div>
+      <li v-for="user in fotosComFiltro" :key="user.id" class="lista-fotos-item">
+          <meu-painel v-bind:titulo="user.first_name + ' ' + user.last_name">
+            <img class="imagem-resposiva" :src="user.avatar" :alt="user.first_name" :title="user.first_name + ' ' + user.last_name" />
+          </meu-painel>
       </li>
     </ul>
   </div>
@@ -30,31 +14,42 @@
 
 <script>
 import axios from "axios";
+import Painel from "./shared/Painel";
 export default {
+  computed: {
+    fotosComFiltro() {
+      if (this.filtro) {
+        let exp = new RegExp(this.filtro.trim(), "i");
+        return this.users.filter(user => exp.test(user.first_name))
+
+      } else {
+        return this.users;
+      }
+    }
+  },
+  components: {
+    "meu-painel": Painel
+  },
   name: "Tela",
   created() {
     axios
       .get("https://reqres.in/api/users")
       .then(response => {
         this.users = response.data.data;
+      }).catch(erro => {
+        this.erros.push(erro)
       })
-      .catch(erro => {
-        this.erros.push(erro);
-      });
   },
   methods: {
-    reverseMessage() {
-      this.message = this.message
-        .split("")
-        .reverse()
-        .join("");
-    }
+      reverseMessage(){
+          this.message = this.message.split('').reverse().join('');
+      }
   },
   data() {
     return {
-      seen: true,
+      titulo: "Título da minha página",
+      seen: false,
       message: "Texto a ser invertido",
-      titulo: "Titulo da minha pagina",
       foto: {
         url:
           "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTwV4kVzT5McBdGSgqlVeRzubrNH_mOrrkKseDOGFURq20HmsrelEfMU7It",
@@ -73,9 +68,10 @@ export default {
             "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOhmlmzV4-Sifx5BIc2SXeA-1CtZJf8jb8V_vPZyKbXIQJKU-rkxGO6OM",
           alt: "Gato"
         }
-      ],
+      ], 
       users: [],
-      erros: []
+      erros:[],
+      filtro: "",
     };
   },
   props: {
@@ -84,7 +80,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .centralizado {
   text-align: center;
@@ -111,26 +106,12 @@ export default {
     width: 100%;
   }
 
-.painel {
-  padding: 0 auto;
-  border: solid 1px grey;
-  display: inline-block;
-  margin: 0 10px;
-  box-shadow: 2px 2px 10px grey;
-  width: 150px;
-  height: 100%;
-  vertical-align: top;
-  text-align: center;
+.filtro {
+  display: block;
+  width: 80%;
+  height: 44px;
+  padding: 5px;
+  font-size: 16px;
 }
 
-.painel .painel-titulo {
-  font-size: 14px;
-  text-align: center;
-  border-bottom: solid 1px grey;
-  background: mediumspringgreen;
-  margin: 0;
-  padding: 10px;
-  text-transform: uppercase;
-
-}
 </style>
